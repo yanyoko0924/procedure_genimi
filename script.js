@@ -1,4 +1,4 @@
-// 制度改正時はここを書き換える
+// 1. 日付計算のルール設定
 const MASTER_RULES = {
     first: [
         { label: "手続き①", offset: -30, base: "en-date" },
@@ -16,50 +16,47 @@ const MASTER_RULES = {
     ]
 };
 
+// 2. ページ読み込み時のアニメーション（GSAP）
+window.onload = () => {
+    gsap.to(".trainee-form", {
+        opacity: 1,
+        x: 0,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "power2.out"
+    });
+};
+
+// 3. 処理開始ボタンが押された時の動作
 function processData() {
     const results = [];
     const forms = document.querySelectorAll('.trainee-form');
     let hasAnyInput = false;
-    let errorOccurred = false;
 
     forms.forEach(form => {
         const i = form.dataset.index;
         const name = form.querySelector('.name').value;
-        const group = form.querySelector('.group').value;
         const enDate = form.querySelector('.en-date').value;
         const asDate = form.querySelector('.as-date').value;
         const type = form.querySelector(`input[name="type-${i}"]:checked`).value;
 
-        // 全空欄チェック用
-        if (name || group || enDate || asDate) hasAnyInput = true;
+        if (name || enDate || asDate) {
+            if (!name || !enDate || !asDate) {
+                alert(`実習生 ${i} の入力が不完全です。`);
+                return;
+            }
+            hasAnyInput = true;
 
-        // 部分入力チェック
-        const fields = [name, group, enDate, asDate];
-        const filledCount = fields.filter(f => f !== "").length;
-        if (filledCount > 0 && filledCount < 4) {
-            alert(`実習生 ${i} の情報が不足しています。`);
-            errorOccurred = true;
-            return;
-        }
-
-        if (filledCount === 4) {
             const rules = MASTER_RULES[type];
             rules.forEach(rule => {
-                const baseDateStr = (rule.base === "en-date") ? enDate : asDate;
-                let targetDate = new Date(baseDateStr);
-
+                let d = new Date(rule.base === "en-date" ? enDate : asDate);
                 if (rule.offset === "1year-prev") {
-                    targetDate.setFullYear(targetDate.getFullYear() + 1);
-                    targetDate.setDate(targetDate.getDate() - 1);
+                    d.setFullYear(d.getFullYear() + 1);
+                    d.setDate(d.getDate() - 1);
                 } else {
-                    targetDate.setDate(targetDate.getDate() + rule.offset);
+                    d.setDate(d.getDate() + rule.offset);
                 }
-
-                results.push({
-                    date: targetDate,
-                    dateStr: targetDate.toLocaleDateString('ja-JP'),
-                    text: `${rule.label} (${name})`
-                });
+                results.push({ date: d, text: `${d.toLocaleDateString('ja-JP')} : ${rule.label} (${name})` });
             });
         }
     });
@@ -68,15 +65,16 @@ function processData() {
         alert("情報を入力してください。");
         return;
     }
-    if (errorOccurred) return;
 
-    // 日付順にソート
+    // 日付順ソート
     results.sort((a, b) => a.date - b.date);
 
-    // 出力
+    // HTMLに書き出し
     const timeline = document.getElementById('timeline');
-    timeline.innerHTML = results.map(r => `<div class="result-item">${r.dateStr} ： ${r.text}</div>`).join('');
-    
-    // 実行日表示
-    document.getElementById('current-date').innerText = `出力日時: ${new Date().toLocaleString('ja-JP')}`;
+    timeline.innerHTML = results.map(r => `<div class="result-item">${r.text}</div>`).join('');
+    document.getElementById('current-date').innerText = `出力日: ${new Date().toLocaleDateString()}`;
+
+    // ★結果表示のアニメーション（GSAP）
+    gsap.to("#result-area", { opacity: 1, duration: 0.5 });
+    gsap.to(".result-item", { opacity: 1, x: 20, stagger: 0.05, delay: 0.2 });
 }
