@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技能実習生 お手続き一覧</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>技能実習生 お手続き一覧</h1>
+        
+        <div id="input-container">
+            <script>
+                for (let i = 1; i <= 10; i++) {
+                    document.write(`
+                        <div class="trainee-form" data-index="${i}">
+                            <h3>実習生 ${i}</h3>
+                            <div class="form-grid">
+                                <input type="text" class="name" placeholder="名称 (name)">
+                                <input type="text" class="group" placeholder="グループ (group)">
+                                <div class="date-input">
+                                    <label>入国日:</label>
+                                    <input type="date" class="en-date">
+                                </div>
+                                <div class="date-input">
+                                    <label>配属日:</label>
+                                    <input type="date" class="as-date">
+                                </div>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="type-${i}" value="first" checked> 1号/2号</label>
+                                    <label><input type="radio" name="type-${i}" value="second"> 3号</label>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                }
+            </script>
+        </div>
+
+        <button id="process-btn" onclick="processData()">処理開始</button>
+
+        <div id="result-area">
+            <div id="timeline"></div>
+            <div id="current-date" class="timestamp"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
